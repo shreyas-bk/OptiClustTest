@@ -23,10 +23,21 @@ class Optimal():
     ):
         """
         *description*
+        *citation*
+        *parameters*
+        *methods*
+        *example*
         """
         self.kmeans_kwargs = kmeans_kwargs
     
     def elbow(self,df,upper=15,display=False,visualize=False,function='inertia',method='angle',se_weight=1.5):
+        """
+        *description*
+        *citation*
+        *parameters*
+        *methods*
+        *example*
+        """
         lower=1
         inertia = []
         K=range(lower,upper)
@@ -71,14 +82,24 @@ class Optimal():
                 sds.append(np.std(np.array(slopes[i:i+3 if i+3<len(slopes) else (i+2 if i+2<len(slopes) else i+1)])))
             diffs = [x[0]-se_weight*x[1]>0 for x in zip(means,sds)]
             optimal = (len(diffs) - list(reversed(diffs)).index(False))
+        else:
+            print('method should be "angle" or "lin"')
+            return -1
         if visualize==True:
-            x = self.visualization(df,optimal) 
+            x = self._visualization(df,optimal) 
             if x=='fail':
                 return optimal, 'Number of columns of the DataFrame should be between 1 and 3 for visualization'
         print('Optimal number of clusters is: ',str(optimal),extra)
         return optimal 
     
-    def visualization(self,df,optimal):
+    def _visualization(self,df,optimal):
+        """
+        *description*
+        *citation*
+        *parameters*
+        *methods*
+        *example*
+        """
         cls = KMeans(n_clusters=optimal,**self.kmeans_kwargs) if self.kmeans_kwargs is not None else KMeans(n_clusters=optimal)
         if len(df.columns) == 1:
             cls_assignment = cls.fit_predict(df)
@@ -105,3 +126,4 @@ class Optimal():
             plt.show()
         else:
             return 'fail'
+        #TODO: add other algos
