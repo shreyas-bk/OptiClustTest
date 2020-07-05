@@ -5,11 +5,13 @@ import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
 import seaborn as sns
 
-class Optimal:
+class Optimal():
     
     """
     To find optimal number of clusters using different optimal clustering algorithms
     *citation*
+    *parameters*
+    *methods*
     *example*
     """
     
@@ -24,12 +26,12 @@ class Optimal:
         """
         self.kmeans_kwargs = kmeans_kwargs
     
-    def elbow(df,max=15,display=False,visualize=False,function='inertia',method='angle',se_weight=1.5):
-        min=1
+    def elbow(self,df,upper=15,display=False,visualize=False,function='inertia',method='angle',se_weight=1.5):
+        lower=1
         inertia = []
-        K=range(min,max)
+        K=range(lower,upper)
         for i in K:
-            cls = KMeans(n_clusters=i,**sel.kmeans_kwargs)
+            cls = KMeans(n_clusters=i,**self.kmeans_kwargs) if self.kmeans_kwargs is not None else KMeans(n_clusters=i)
             cls_assignment = cls.fit_predict(df)
             if function=='inertia':
                 inertia.append(cls.inertia_)
@@ -39,7 +41,7 @@ class Optimal:
             else:
                 print('function should be "inertia" or "distortion"')
                 return -1
-        inertia = np.array(inertia)/(np.array(inertia)).max()*(max-min)
+        inertia = np.array(inertia)/(np.array(inertia)).max()*(upper-lower)
         slopes = [inertia[0]-inertia[1]]
         for i in range(len(inertia)-1):
             slopes.append(-(inertia[i+1]-inertia[i]))
@@ -57,7 +59,7 @@ class Optimal:
             optimal = np.array(angles).argmax()+1
             confidence = round(np.array(angles).max()/90*100,2)
             if confidence<=50:
-                extra=' with Confidence:'+str(confidence)+'%.'+' Try using elbow_lin or gap_stat_se predictor'
+                extra=' with Confidence:'+str(confidence)+'%.'+' Try using elbow_kf, gap_stat_se or other methods'
         elif method == 'lin':
             slopes = [inertia[0]-inertia[1]]
             for i in range(len(inertia)-1):
@@ -70,22 +72,21 @@ class Optimal:
             diffs = [x[0]-se_weight*x[1]>0 for x in zip(means,sds)]
             optimal = (len(diffs) - list(reversed(diffs)).index(False))
         if visualize==True:
-            x = visualization(df,optimal) 
+            x = self.visualization(df,optimal) 
             if x=='fail':
                 return optimal, 'Number of columns of the DataFrame should be between 1 and 3 for visualization'
         print('Optimal number of clusters is: ',str(optimal),extra)
         return optimal 
     
-    def visualization(df,optimal):
+    def visualization(self,df,optimal):
+        cls = KMeans(n_clusters=optimal,**self.kmeans_kwargs) if self.kmeans_kwargs is not None else KMeans(n_clusters=optimal)
         if len(df.columns) == 1:
-            cls = KMeans(n_clusters=optimal,**sel.kmeans_kwargs)
             cls_assignment = cls.fit_predict(df)
             col_name = df.columns[0]
             sns.stripplot(data = df,x=['']*len(df),y=col_name,hue=cls_assignment)
             plt.title('Clustering with '+str(optimal)+' clusters')
             plt.show()
         elif len(df.columns)==2:
-            cls = KMeans(n_clusters=optimal,**sel.kmeans_kwargs)
             cls_assignment = cls.fit_predict(df)
             col_name1 = df.columns[0]
             col_name2 = df.columns[1]
@@ -93,7 +94,6 @@ class Optimal:
             plt.title('Clustering with '+str(optimal)+' clusters')
             plt.show()
         elif len(df.columns)==3:
-            cls = KMeans(n_clusters=optimal,**sel.kmeans_kwargs)
             cls_assignment = cls.fit_predict(df)
             fig = plt.figure()
             ax = plt.axes(projection="3d")
