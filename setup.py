@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="OptiClustTest",
-    version="0.0.2",
+    version="0.0.3",
     author="Shreyas Kera",
     author_email="shreykera7@gmail.com",
     description="Python implementation of various algorithms to find the optimal number of clusters",
