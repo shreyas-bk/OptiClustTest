@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd # added pandas module for v 0.0.5 (needed when features=3, visualize=True)
 from sklearn.cluster import KMeans
 from scipy.spatial.distance import cdist 
 import matplotlib.pyplot as plt
@@ -50,8 +51,7 @@ class Optimal():
                 inertia.append(sum(np.min(cdist(df, cls.cluster_centers_, 
                           'euclidean'),axis=1)) / df.shape[0])
             else:
-                print('function should be "inertia" or "distortion"')
-                return -1
+                raise ValueError('function should be "inertia" or "distortion"')
         inertia = np.array(inertia)/(np.array(inertia)).max()*(upper-lower)
         slopes = [inertia[0]-inertia[1]]
         for i in range(len(inertia)-1):
@@ -70,7 +70,7 @@ class Optimal():
             optimal = np.array(angles).argmax()+1
             confidence = round(np.array(angles).max()/90*100,2)
             if confidence<=50:
-                extra=' with Confidence:'+str(confidence)+'%.'+' Try using elbow_kf, gap_stat_se or other methods'
+                extra=' with Confidence:'+str(confidence)+'%.'+' Try using elbow_kf, gap_stat_se or other methods, or change the method parameter to "lin"'
         elif method == 'lin':
             slopes = [inertia[0]-inertia[1]]
             for i in range(len(inertia)-1):
@@ -83,13 +83,12 @@ class Optimal():
             diffs = [x[0]-se_weight*x[1]>0 for x in zip(means,sds)]
             optimal = (len(diffs) - list(reversed(diffs)).index(False))
         else:
-            print('method should be "angle" or "lin"')
-            return -1
+            raise ValueError('method should be "angle" or "lin"')
         if visualize==True:
             x = self._visualization(df,optimal) 
             if x=='fail':
-                return optimal, 'Number of columns of the DataFrame should be between 1 and 3 for visualization'
-        print('Optimal number of clusters is: ',str(optimal),extra)
+                raise ValueError('Optimal number of clusters is: '+str(optimal)+'. Number of columns of the DataFrame should be between 1 and 3 for visualization, given is '+str(len(df.columns)-1))
+        print('Optimal number of clusters is: ',str(optimal),extra) # raised ValueErrors for fail cases v 0.0.5
         return optimal 
     
     def _visualization(self,df,optimal):
